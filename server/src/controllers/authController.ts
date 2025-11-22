@@ -131,7 +131,7 @@ export const login = async (
       return;
     }
 
-    // Find user and include password field
+    // Find user and include password field (status is included by default)
     const user = await User.findOne({ email: email.toLowerCase() }).select(
       '+password'
     );
@@ -146,6 +146,22 @@ export const login = async (
       });
       return;
     }
+
+    // Check if user is active - STRICT CHECK: only 'active' status allows login
+    // This check happens BEFORE password validation to prevent any login attempts
+    if (user.status !== 'active') {
+      const statusValue = user.status || 'undefined';
+      console.log(
+        `[SECURITY] Login BLOCKED: User "${email.toLowerCase()}" has status "${statusValue}" (not active). Login attempt rejected.`
+      );
+      res.status(403).json({
+        success: false,
+        message: 'Your account is inactive. Please contact support for assistance.',
+      });
+      return; // CRITICAL: Stop execution here - do not proceed with login
+    }
+    
+    console.log(`Login proceeding: User "${email.toLowerCase()}" has active status, proceeding with password validation.`);
 
     // Check password
     const isPasswordValid = await user.comparePassword(password);

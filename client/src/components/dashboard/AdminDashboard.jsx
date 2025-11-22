@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Users,
   Calendar,
@@ -7,17 +7,17 @@ import {
   Filter,
   UserCircle,
   Mail,
-  Clock,
   Activity,
   User,
   Heart,
   AlertTriangle,
   Shield,
 } from "lucide-react";
+import { toast } from "react-hot-toast";
 import Modal from "../Modal";
 import api from "../../utils/api";
 
-const AdminDashboard = ({ user, data }) => {
+const AdminDashboard = ({ user, data, onDataUpdate }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
@@ -31,32 +31,58 @@ const AdminDashboard = ({ user, data }) => {
   const [newStatus, setNewStatus] = useState("");
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [allUsers, setAllUsers] = useState(data?.users || []);
+  const [statsData, setStatsData] = useState(data?.stats || {});
 
-  // Use real data from API or fallback to empty array
-  const allUsers = data?.users || [];
+  // Update local users list and stats when data prop changes
+  useEffect(() => {
+    if (data?.users) {
+      setAllUsers(data.users);
+    }
+    if (data?.stats) {
+      setStatsData(data.stats);
+    }
+  }, [data?.users, data?.stats]);
+
+  // Calculate stats from current users list
+  const calculateStats = () => {
+    const totalUsers = allUsers.length;
+    const totalPatients = allUsers.filter(u => u.role === 'patient').length;
+    const totalDoctors = allUsers.filter(u => u.role === 'doctor').length;
+    const totalActivities = statsData.totalActivities || data?.stats?.totalActivities || 0;
+
+    return {
+      totalUsers,
+      totalPatients,
+      totalDoctors,
+      totalActivities,
+    };
+  };
+
+  const currentStats = calculateStats();
 
   const stats = [
     {
       title: "Total Users",
-      value: data?.stats?.totalUsers?.toString() || "0",
+      value: currentStats.totalUsers.toString(),
       icon: Users,
       color: "bg-blue-500",
     },
     {
       title: "Total Patients",
-      value: data?.stats?.totalPatients?.toString() || "0",
+      value: currentStats.totalPatients.toString(),
       icon: UserCircle,
       color: "bg-green-500",
     },
     {
       title: "Total Doctors",
-      value: data?.stats?.totalDoctors?.toString() || "0",
+      value: currentStats.totalDoctors.toString(),
       icon: Stethoscope,
       color: "bg-purple-500",
     },
     {
       title: "Total Activities",
-      value: data?.stats?.totalActivities?.toString() || "0",
+      value: currentStats.totalActivities.toString(),
       icon: Activity,
       color: "bg-orange-500",
     },
@@ -70,7 +96,9 @@ const AdminDashboard = ({ user, data }) => {
       userItem.email.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesRole = filterRole === "all" || userItem.role === filterRole;
-    const matchesStatus = filterStatus === "all" || userItem.status === filterStatus;
+    // Normalize status for comparison (handle undefined/null and default to 'active')
+    const userStatus = (userItem.status || "active").toLowerCase();
+    const matchesStatus = filterStatus === "all" || userStatus === filterStatus.toLowerCase();
 
     return matchesSearch && matchesRole && matchesStatus;
   });
@@ -151,10 +179,14 @@ const AdminDashboard = ({ user, data }) => {
   };
 
   const handleChangeRole = async () => {
-    if (!selectedUser || !userDetails || !newRole) return;
+    if (!selectedUser || !userDetails || !newRole) {
+      toast.error("Missing required information");
+      return;
+    }
 
     if (newRole === userDetails.role) {
       setError("User already has this role");
+      toast.error("User already has this role");
       return;
     }
 
@@ -164,35 +196,60 @@ const AdminDashboard = ({ user, data }) => {
 
     try {
       const response = await api.user.updateUserRole(selectedUser.id, newRole);
-      if (response.success) {
-        setSuccess(
-          `Successfully changed ${userDetails.firstname} ${userDetails.lastname} to ${newRole} role`
-        );
-        // Update user details
+      if (response && response.success) {
+        const successMessage = `Successfully changed ${userDetails.firstname} ${userDetails.lastname} to ${newRole} role`;
+        setSuccess(successMessage);
+        toast.success(successMessage);
+        
+        // Update user details in modal
         setUserDetails((prev) => ({
           ...prev,
           role: newRole,
         }));
-        // Refresh dashboard data after a delay
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
+        
+        // Update the user in the local users list
+        setAllUsers((prevUsers) =>
+          prevUsers.map((u) =>
+            u.id === selectedUser.id ? { ...u, role: newRole } : u
+          )
+        );
+        
+        // Update selectedUser to reflect the change
+        setSelectedUser((prev) => ({
+          ...prev,
+          role: newRole,
+        }));
+        
+        // Call parent callback to refresh data if provided (without page reload)
+        if (onDataUpdate && typeof onDataUpdate === 'function') {
+          onDataUpdate();
+        }
+        // No page reload - UI is already updated via state changes above
       } else {
-        setError(response.message || "Failed to update role");
+        const errorMessage = response?.message || "Failed to update role";
+        setError(errorMessage);
+        toast.error(errorMessage);
       }
     } catch (err) {
       console.error("Error updating role:", err);
-      setError(err.message || "Failed to update role");
+      const errorMessage = err?.message || err?.data?.message || "Failed to update role";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsUpdatingRole(false);
     }
   };
 
   const handleChangeStatus = async () => {
-    if (!selectedUser || !userDetails || !newStatus) return;
+    if (!selectedUser || !userDetails || !newStatus) {
+      toast.error("Missing required information");
+      return;
+    }
 
-    if (newStatus === (userDetails.status || "active")) {
+    const currentStatus = userDetails.status || "active";
+    if (newStatus === currentStatus) {
       setError("User already has this status");
+      toast.error("User already has this status");
       return;
     }
 
@@ -201,26 +258,52 @@ const AdminDashboard = ({ user, data }) => {
     setIsUpdatingStatus(true);
 
     try {
+      console.log("Updating user status:", { userId: selectedUser.id, newStatus });
       const response = await api.user.updateUserStatus(selectedUser.id, newStatus);
-      if (response.success) {
-        setSuccess(
-          `Successfully changed ${userDetails.firstname} ${userDetails.lastname} status to ${newStatus}`
-        );
-        // Update user details
+      
+      console.log("Status update response:", response);
+      
+      if (response && response.success) {
+        const successMessage = `Successfully changed ${userDetails.firstname} ${userDetails.lastname} status to ${newStatus}`;
+        setSuccess(successMessage);
+        toast.success(successMessage);
+        
+        // Update user details in modal
         setUserDetails((prev) => ({
           ...prev,
           status: newStatus,
         }));
-        // Refresh dashboard data after a delay
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
+        
+        // Update the user in the local users list
+        setAllUsers((prevUsers) =>
+          prevUsers.map((u) =>
+            u.id === selectedUser.id ? { ...u, status: newStatus } : u
+          )
+        );
+        
+        // Update selectedUser to reflect the change
+        setSelectedUser((prev) => ({
+          ...prev,
+          status: newStatus,
+        }));
+        
+        // Call parent callback to refresh data if provided (without page reload)
+        if (onDataUpdate && typeof onDataUpdate === 'function') {
+          // Call the callback to refresh data from parent
+          onDataUpdate();
+        }
+        // No page reload - UI is already updated via state changes above
+        // The table will automatically reflect the change through allUsers state
       } else {
-        setError(response.message || "Failed to update status");
+        const errorMessage = response?.message || "Failed to update status";
+        setError(errorMessage);
+        toast.error(errorMessage);
       }
     } catch (err) {
       console.error("Error updating status:", err);
-      setError(err.message || "Failed to update status");
+      const errorMessage = err?.message || err?.data?.message || "Failed to update status";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsUpdatingStatus(false);
     }
@@ -395,13 +478,13 @@ const AdminDashboard = ({ user, data }) => {
                     <td className="px-4 py-4 whitespace-nowrap">
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          userItem.status === "active"
+                          (userItem.status || "active") === "active"
                             ? "bg-green-100 text-green-800"
                             : "bg-gray-100 text-gray-800"
                         }`}
                       >
-                        {userItem.status.charAt(0).toUpperCase() +
-                          userItem.status.slice(1)}
+                        {((userItem.status || "active").charAt(0).toUpperCase() +
+                          (userItem.status || "active").slice(1))}
                       </span>
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm">

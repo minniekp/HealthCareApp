@@ -289,7 +289,7 @@ export const getAdminDashboard = async (
 
     // Get all users with their last login activity
     const allUsers = await User.find()
-      .select('firstname lastname email DOB gender role createdAt')
+      .select('firstname lastname email DOB gender role status createdAt')
       .sort({ createdAt: -1 });
 
     const userIds = allUsers.map((u) => u._id);
@@ -330,7 +330,7 @@ export const getAdminDashboard = async (
         role: user.role,
         lastLogin: lastLogin || null,
         registeredAt: user.createdAt,
-        status: user.status || (lastLogin ? 'active' : 'inactive'),
+        status: user.status || 'active', // Use actual status from database, default to 'active' if not set
       };
     });
 
