@@ -16,6 +16,18 @@ import {
   Droplet,
   Moon,
 } from "lucide-react";
+import {
+  ComposedChart,
+  BarChart,
+  Bar,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 import Modal from "../Modal";
 import api from "../../utils/api";
 
@@ -221,8 +233,8 @@ const DoctorDashboard = ({ user, data }) => {
   // Get current health data based on selected period
   const currentHealthData = selectedPeriod === "7days" ? healthData7Days : healthData30Days;
 
-  // Format date for display
-  const formatDateLabel = (dateString) => {
+  // Format date for chart
+  const formatChartDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
       month: "short",
@@ -230,20 +242,38 @@ const DoctorDashboard = ({ user, data }) => {
     });
   };
 
-  // Calculate max values for graphs
-  const getMaxSteps = () => {
-    if (!currentHealthData?.healthData?.length) return 10000;
-    return Math.max(...currentHealthData.healthData.map((d) => d.steps || 0), 10000);
-  };
+  // Prepare chart data
+  const chartData = currentHealthData?.healthData?.map((data) => ({
+    date: formatChartDate(data.date),
+    fullDate: new Date(data.date).toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+    }),
+    steps: data.steps || 0,
+    waterIntake: data.waterIntake || 0,
+    sleepHours: data.sleepHours || 0,
+  })) || [];
 
-  const getMaxWater = () => {
-    if (!currentHealthData?.healthData?.length) return 3000;
-    return Math.max(...currentHealthData.healthData.map((d) => d.waterIntake || 0), 3000);
-  };
-
-  const getMaxSleep = () => {
-    if (!currentHealthData?.healthData?.length) return 10;
-    return Math.max(...currentHealthData.healthData.map((d) => d.sleepHours || 0), 10);
+  // Custom tooltip component
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
+          <p className="font-semibold text-gray-900 mb-2 text-sm">{label}</p>
+          {payload.map((entry, index) => (
+            <p key={index} className="text-xs" style={{ color: entry.color }}>
+              <span className="font-medium">{entry.name}:</span>{" "}
+              {entry.name === "Steps"
+                ? entry.value.toLocaleString()
+                : entry.name === "Water Intake"
+                ? `${entry.value} ml`
+                : `${entry.value} hrs`}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
   };
 
   return (
@@ -638,127 +668,178 @@ const DoctorDashboard = ({ user, data }) => {
                   {/* Statistics Summary */}
                   {currentHealthData.statistics && (
                     <div className="grid grid-cols-3 gap-3">
-                      <div className="bg-blue-50 rounded-lg p-3">
+                      <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-3 border border-blue-200">
                         <div className="flex items-center gap-2 mb-1">
-                          <Footprints className="text-blue-600" size={16} />
+                          <div className="bg-blue-500 p-1.5 rounded">
+                            <Footprints className="text-white" size={14} />
+                          </div>
                           <span className="text-xs font-medium text-blue-900">Avg Steps</span>
                         </div>
-                        <p className="text-lg font-bold text-blue-900">
+                        <p className="text-lg font-bold text-blue-900 mt-1">
                           {currentHealthData.statistics.avgSteps.toLocaleString()}
                         </p>
                       </div>
-                      <div className="bg-cyan-50 rounded-lg p-3">
+                      <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-lg p-3 border border-cyan-200">
                         <div className="flex items-center gap-2 mb-1">
-                          <Droplet className="text-cyan-600" size={16} />
+                          <div className="bg-cyan-500 p-1.5 rounded">
+                            <Droplet className="text-white" size={14} />
+                          </div>
                           <span className="text-xs font-medium text-cyan-900">Avg Water</span>
                         </div>
-                        <p className="text-lg font-bold text-cyan-900">
+                        <p className="text-lg font-bold text-cyan-900 mt-1">
                           {currentHealthData.statistics.avgWater} ml
                         </p>
                       </div>
-                      <div className="bg-indigo-50 rounded-lg p-3">
+                      <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg p-3 border border-indigo-200">
                         <div className="flex items-center gap-2 mb-1">
-                          <Moon className="text-indigo-600" size={16} />
+                          <div className="bg-indigo-500 p-1.5 rounded">
+                            <Moon className="text-white" size={14} />
+                          </div>
                           <span className="text-xs font-medium text-indigo-900">Avg Sleep</span>
                         </div>
-                        <p className="text-lg font-bold text-indigo-900">
+                        <p className="text-lg font-bold text-indigo-900 mt-1">
                           {currentHealthData.statistics.avgSleep} hrs
                         </p>
                       </div>
                     </div>
                   )}
 
-                  {/* Steps Chart */}
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <Footprints className="text-blue-600" size={18} />
-                      <h5 className="text-sm font-semibold text-gray-900">Daily Steps</h5>
+                  {/* Steps and Sleep Combined Chart */}
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="bg-blue-500 p-1.5 rounded">
+                        <Footprints className="text-white" size={16} />
+                      </div>
+                      <h5 className="text-sm font-semibold text-gray-900">Daily Steps & Sleep Hours</h5>
                     </div>
-                    <div className="h-32 flex items-end justify-between gap-1">
-                      {currentHealthData.healthData.map((data, index) => {
-                        const height = (data.steps / getMaxSteps()) * 100;
-                        return (
-                          <div key={index} className="flex-1 flex flex-col items-center group">
-                            <div className="w-full flex flex-col items-center justify-end h-full relative">
-                              <div
-                                className="w-full bg-blue-500 rounded-t transition-all hover:bg-blue-600 cursor-pointer"
-                                style={{ height: `${height}%` }}
-                                title={`${formatDateLabel(data.date)}: ${data.steps.toLocaleString()}`}
-                              >
-                                <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 text-white text-xs px-1.5 py-0.5 rounded whitespace-nowrap">
-                                  {data.steps.toLocaleString()}
-                                </div>
-                              </div>
-                            </div>
-                            <div className="text-xs text-gray-500 mt-1 text-center">
-                              {formatDateLabel(data.date)}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
+                    <ResponsiveContainer width="100%" height={280}>
+                      <ComposedChart
+                        data={chartData}
+                        margin={{ top: 10, right: 20, left: 0, bottom: 40 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                        <XAxis
+                          dataKey="date"
+                          stroke="#6b7280"
+                          style={{ fontSize: "10px", fontWeight: 500 }}
+                          angle={-45}
+                          textAnchor="end"
+                          height={60}
+                          tick={{ fill: "#6b7280" }}
+                        />
+                        <YAxis
+                          yAxisId="left"
+                          label={{ 
+                            value: "Steps", 
+                            angle: -90, 
+                            position: "insideLeft", 
+                            style: { fontSize: "10px", fill: "#3b82f6", fontWeight: 600 } 
+                          }}
+                          stroke="#3b82f6"
+                          style={{ fontSize: "10px" }}
+                          tick={{ fill: "#3b82f6" }}
+                          tickFormatter={(value) => value >= 1000 ? `${(value / 1000).toFixed(0)}k` : value.toString()}
+                          domain={[0, 'dataMax']}
+                        />
+                        <YAxis
+                          yAxisId="right"
+                          orientation="right"
+                          label={{ 
+                            value: "Sleep Hours", 
+                            angle: 90, 
+                            position: "insideRight", 
+                            style: { fontSize: "10px", fill: "#6366f1", fontWeight: 600 } 
+                          }}
+                          stroke="#6366f1"
+                          style={{ fontSize: "10px" }}
+                          tick={{ fill: "#6366f1" }}
+                          domain={[0, 12]}
+                        />
+                        <Tooltip 
+                          content={<CustomTooltip />}
+                          cursor={{ fill: 'rgba(59, 130, 246, 0.1)' }}
+                        />
+                        <Legend
+                          wrapperStyle={{ paddingTop: "15px", fontSize: "11px" }}
+                          iconType="circle"
+                          align="center"
+                        />
+                        <Bar
+                          yAxisId="left"
+                          dataKey="steps"
+                          name="Steps"
+                          fill="#3b82f6"
+                          radius={[4, 4, 0, 0]}
+                          opacity={0.9}
+                        />
+                        <Line
+                          yAxisId="right"
+                          type="monotone"
+                          dataKey="sleepHours"
+                          name="Sleep Hours"
+                          stroke="#6366f1"
+                          strokeWidth={2.5}
+                          dot={{ fill: "#6366f1", r: 4, strokeWidth: 2, stroke: "#fff" }}
+                          activeDot={{ r: 6, strokeWidth: 2, stroke: "#fff" }}
+                        />
+                      </ComposedChart>
+                    </ResponsiveContainer>
                   </div>
 
                   {/* Water Intake Chart */}
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <Droplet className="text-cyan-600" size={18} />
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="bg-cyan-500 p-1.5 rounded">
+                        <Droplet className="text-white" size={16} />
+                      </div>
                       <h5 className="text-sm font-semibold text-gray-900">Water Intake (ml)</h5>
                     </div>
-                    <div className="h-32 flex items-end justify-between gap-1">
-                      {currentHealthData.healthData.map((data, index) => {
-                        const height = (data.waterIntake / getMaxWater()) * 100;
-                        return (
-                          <div key={index} className="flex-1 flex flex-col items-center group">
-                            <div className="w-full flex flex-col items-center justify-end h-full relative">
-                              <div
-                                className="w-full bg-cyan-500 rounded-t transition-all hover:bg-cyan-600 cursor-pointer"
-                                style={{ height: `${height}%` }}
-                                title={`${formatDateLabel(data.date)}: ${data.waterIntake} ml`}
-                              >
-                                <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 text-white text-xs px-1.5 py-0.5 rounded whitespace-nowrap">
-                                  {data.waterIntake} ml
-                                </div>
-                              </div>
-                            </div>
-                            <div className="text-xs text-gray-500 mt-1 text-center">
-                              {formatDateLabel(data.date)}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Sleep Hours Chart */}
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <Moon className="text-indigo-600" size={18} />
-                      <h5 className="text-sm font-semibold text-gray-900">Sleep Hours</h5>
-                    </div>
-                    <div className="h-32 flex items-end justify-between gap-1">
-                      {currentHealthData.healthData.map((data, index) => {
-                        const height = (data.sleepHours / getMaxSleep()) * 100;
-                        return (
-                          <div key={index} className="flex-1 flex flex-col items-center group">
-                            <div className="w-full flex flex-col items-center justify-end h-full relative">
-                              <div
-                                className="w-full bg-indigo-500 rounded-t transition-all hover:bg-indigo-600 cursor-pointer"
-                                style={{ height: `${height}%` }}
-                                title={`${formatDateLabel(data.date)}: ${data.sleepHours} hrs`}
-                              >
-                                <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 text-white text-xs px-1.5 py-0.5 rounded whitespace-nowrap">
-                                  {data.sleepHours} hrs
-                                </div>
-                              </div>
-                            </div>
-                            <div className="text-xs text-gray-500 mt-1 text-center">
-                              {formatDateLabel(data.date)}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
+                    <ResponsiveContainer width="100%" height={280}>
+                      <BarChart
+                        data={chartData}
+                        margin={{ top: 10, right: 20, left: 0, bottom: 40 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                        <XAxis
+                          dataKey="date"
+                          stroke="#6b7280"
+                          style={{ fontSize: "10px", fontWeight: 500 }}
+                          angle={-45}
+                          textAnchor="end"
+                          height={60}
+                          tick={{ fill: "#6b7280" }}
+                        />
+                        <YAxis
+                          label={{ 
+                            value: "Water Intake (ml)", 
+                            angle: -90, 
+                            position: "insideLeft", 
+                            style: { fontSize: "10px", fill: "#06b6d4", fontWeight: 600 } 
+                          }}
+                          stroke="#06b6d4"
+                          style={{ fontSize: "10px" }}
+                          tick={{ fill: "#06b6d4" }}
+                          tickFormatter={(value) => value >= 1000 ? `${(value / 1000).toFixed(1)}L` : `${value}ml`}
+                          domain={[0, 'dataMax']}
+                        />
+                        <Tooltip 
+                          content={<CustomTooltip />}
+                          cursor={{ fill: 'rgba(6, 182, 212, 0.1)' }}
+                        />
+                        <Legend
+                          wrapperStyle={{ paddingTop: "15px", fontSize: "11px" }}
+                          iconType="circle"
+                          align="center"
+                        />
+                        <Bar
+                          dataKey="waterIntake"
+                          name="Water Intake"
+                          fill="#06b6d4"
+                          radius={[4, 4, 0, 0]}
+                          opacity={0.9}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
                   </div>
                 </div>
               ) : (
