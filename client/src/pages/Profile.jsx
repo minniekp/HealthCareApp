@@ -5,6 +5,7 @@ import {
   Calendar,
   Heart,
   Edit,
+  Stethoscope,
 } from "lucide-react";
 import api from "../utils/api";
 
@@ -151,20 +152,59 @@ const Profile = () => {
         </div>
       </div>
 
-      {/* Medical Summary (Placeholder) */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-          <Heart className="text-primary" size={24} />
-          Medical Summary
-        </h2>
-        <div className="bg-gray-50 rounded-lg p-6 text-center">
-          <Heart className="text-gray-400 mx-auto mb-2" size={32} />
-          <p className="text-gray-600">No medical records available yet</p>
-          <p className="text-sm text-gray-500 mt-1">
-            Your medical information will appear here once available
-          </p>
+      {/* Role-specific Information */}
+      {user?.role === "doctor" ? (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <Stethoscope className="text-primary" size={24} />
+            Professional Information
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-500">
+                Specialization
+              </label>
+              <p className="text-gray-900 font-medium">
+                General Practitioner
+              </p>
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-500">
+                License Number
+              </label>
+              <p className="text-gray-900 font-medium">MD-12345</p>
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-500">
+                Years of Experience
+              </label>
+              <p className="text-gray-900 font-medium">
+                {getAge(user?.DOB) > 30 ? "10+ years" : "5+ years"}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-500">
+                Total Patients
+              </label>
+              <p className="text-gray-900 font-medium">3 patients</p>
+            </div>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <Heart className="text-primary" size={24} />
+            Medical Summary
+          </h2>
+          <div className="bg-gray-50 rounded-lg p-6 text-center">
+            <Heart className="text-gray-400 mx-auto mb-2" size={32} />
+            <p className="text-gray-600">No medical records available yet</p>
+            <p className="text-sm text-gray-500 mt-1">
+              Your medical information will appear here once available
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

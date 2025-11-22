@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import api from "../../utils/api";
 import InputField from "../../components/common/InputField";
+// Note: Authentication check is handled by AuthLayout middleware
 
 const Register = () => {
   const navigate = useNavigate();
@@ -158,7 +159,7 @@ const Register = () => {
 
       // Small delay to show the success message
       setTimeout(() => {
-        navigate("/dashboard");
+        navigate("/dashboard", { replace: true });
       }, 500);
     } catch (error) {
       console.error("Registration error:", error);

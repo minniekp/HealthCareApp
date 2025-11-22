@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import api from "../../utils/api";
 import InputField from "../../components/common/InputField";
+// Note: Authentication check is handled by PublicRoute middleware in AuthLayout
 
 const Login = () => {
   const navigate = useNavigate();
@@ -75,7 +76,7 @@ const Login = () => {
 
       // Small delay to show the success message
       setTimeout(() => {
-        navigate("/dashboard");
+        navigate("/dashboard", { replace: true });
       }, 500);
     } catch (error) {
       console.error("Login error:", error);

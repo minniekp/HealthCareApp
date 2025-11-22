@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from "express";
-import { verifyAccessToken } from "../utils/jwt";
+import { Request, Response, NextFunction } from 'express';
+import { verifyAccessToken } from '../utils/jwt';
 
 export interface AuthRequest extends Request {
   user?: {
@@ -17,10 +17,10 @@ export const authenticate = async (
   try {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       res.status(401).json({
         success: false,
-        message: "No token provided or invalid format",
+        message: 'No token provided or invalid format',
       });
       return;
     }
@@ -34,18 +34,16 @@ export const authenticate = async (
     } catch (error: any) {
       res.status(401).json({
         success: false,
-        message: "Invalid or expired token",
+        message: 'Invalid or expired token',
       });
       return;
     }
   } catch (error: any) {
-    console.error("Authentication error:", error);
+    console.error('Authentication error:', error);
     res.status(500).json({
       success: false,
-      message: "Authentication failed",
+      message: 'Authentication failed',
     });
     return;
   }
 };
-
-
