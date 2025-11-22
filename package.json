@@ -10,7 +10,7 @@
         "install:all": "yarn install && cd server && yarn install && cd ../client && yarn install",
         "build": "cd server && yarn build",
         "build:client": "cd client && yarn build",
-        "start": "cd server && yarn start"
+        "start": "cd server && yarn build && yarn start"
     },
     "keywords": [
         "food-delivery",

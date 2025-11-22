@@ -124,6 +124,7 @@ export const login = async (req: Request<{}, {}, LoginBody>, res: Response): Pro
     const user = await User.findOne({ email: email.toLowerCase() }).select("+password");
 
     if (!user) {
+      console.log(`Login attempt failed: User not found for email ${email.toLowerCase()}`);
       res.status(401).json({
         success: false,
         message: "Invalid email or password",
@@ -134,6 +135,7 @@ export const login = async (req: Request<{}, {}, LoginBody>, res: Response): Pro
     // Check password
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
+      console.log(`Login attempt failed: Invalid password for email ${email.toLowerCase()}`);
       res.status(401).json({
         success: false,
         message: "Invalid email or password",
@@ -269,4 +271,5 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
     });
   }
 };
+
 
