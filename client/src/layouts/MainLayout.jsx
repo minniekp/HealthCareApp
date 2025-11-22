@@ -7,7 +7,6 @@ import {
   LogOut,
   Menu,
   X,
-  AlertTriangle,
   ChevronDown,
   UserCircle,
 } from "lucide-react";
@@ -278,25 +277,35 @@ const MainLayout = () => {
       <Modal
         isOpen={showLogoutModal}
         onClose={() => setShowLogoutModal(false)}
-        title="Confirm Logout"
+        title=""
         size="sm"
       >
-        <div className="space-y-4">
-          <div className="flex items-center gap-3 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <AlertTriangle className="text-yellow-600" size={24} />
-            <p className="text-gray-700">Are you sure you want to logout?</p>
+        <div className="space-y-6">
+          {/* Icon and Title */}
+          <div className="flex flex-col items-center text-center pt-2">
+            <div className="w-20 h-20 bg-gradient-to-br from-red-100 to-red-50 rounded-full flex items-center justify-center mb-4 shadow-inner">
+              <LogOut className="text-red-600" size={36} strokeWidth={2} />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">Confirm Logout</h3>
+            <p className="text-gray-600 text-sm max-w-sm">
+              Are you sure you want to logout? You'll need to sign in again to access your account.
+            </p>
           </div>
 
-          <div className="flex gap-3">
-            <button onClick={confirmLogout} className="btn-danger flex-1">
-              <LogOut size={20} className="inline mr-2" />
-              Yes, Logout
-            </button>
+          {/* Action Buttons */}
+          <div className="flex gap-3 pt-2">
             <button
               onClick={() => setShowLogoutModal(false)}
-              className="btn-secondary flex-1"
+              className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 active:bg-gray-300 transition-all duration-200 shadow-sm"
             >
               Cancel
+            </button>
+            <button
+              onClick={confirmLogout}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg font-semibold hover:from-red-700 hover:to-red-800 active:from-red-800 active:to-red-900 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <LogOut size={18} strokeWidth={2.5} />
+              Yes, Logout
             </button>
           </div>
         </div>

@@ -27,6 +27,7 @@ const Register = () => {
     confirmPassword: "",
     DOB: "",
     gender: "",
+    consent: false,
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -40,6 +41,7 @@ const Register = () => {
     confirmPassword: "",
     DOB: "",
     gender: "",
+    consent: "",
   });
 
   const validateForm = () => {
@@ -51,6 +53,7 @@ const Register = () => {
       confirmPassword: "",
       DOB: "",
       gender: "",
+      consent: "",
     };
     let isValid = true;
 
@@ -118,6 +121,12 @@ const Register = () => {
       isValid = false;
     }
 
+    // Consent validation
+    if (!formData.consent) {
+      newErrors.consent = "You must agree to the terms and conditions";
+      isValid = false;
+    }
+
     setErrors(newErrors);
     return isValid;
   };
@@ -135,6 +144,7 @@ const Register = () => {
       confirmPassword: "",
       DOB: "",
       gender: "",
+      consent: "",
     });
 
     // Validate form
@@ -193,7 +203,8 @@ const Register = () => {
   };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const value = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+    setFormData({ ...formData, [e.target.name]: value });
     // Clear error for this field when user starts typing
     setErrors({ ...errors, [e.target.name]: "" });
   };
@@ -426,6 +437,59 @@ const Register = () => {
                 onTogglePassword={toggleConfirmPasswordVisibility}
                 required
               />
+
+              {/* Consent Checkbox */}
+              <div className="pt-2">
+                <div className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    id="consent"
+                    name="consent"
+                    checked={formData.consent}
+                    onChange={handleChange}
+                    disabled={isLoading || isRedirecting}
+                    className={`mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary ${
+                      errors.consent ? "border-red-500" : ""
+                    }`}
+                    required
+                  />
+                  <label
+                    htmlFor="consent"
+                    className="text-sm text-gray-700 cursor-pointer"
+                  >
+                    I agree to the{" "}
+                    <a
+                      href="#"
+                      className="text-primary hover:underline font-medium"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        // You can add a modal or navigate to terms page here
+                        toast.info("Terms and Conditions page coming soon");
+                      }}
+                    >
+                      Terms and Conditions
+                    </a>{" "}
+                    and{" "}
+                    <a
+                      href="#"
+                      className="text-primary hover:underline font-medium"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        // You can add a modal or navigate to privacy policy page here
+                        toast.info("Privacy Policy page coming soon");
+                      }}
+                    >
+                      Privacy Policy
+                    </a>
+                    . I consent to the storage and processing of my personal data.
+                  </label>
+                </div>
+                {errors.consent && (
+                  <div className="flex items-center gap-1 mt-1 text-red-600 text-sm">
+                    <span>{errors.consent}</span>
+                  </div>
+                )}
+              </div>
 
               <button
                 type="submit"
