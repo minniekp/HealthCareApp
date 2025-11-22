@@ -2,6 +2,13 @@
 
 React-based frontend application for the Healthcare Management System.
 
+**Squad 4**
+
+**Team Members:**
+
+- Vaishnav V
+- Aashiq Ali
+
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -310,5 +317,12 @@ Creates an optimized production build in the `build` folder.
 ISC
 
 ---
+
+**Squad 4**
+
+**Team Members:**
+
+- Vaishnav V
+- Aashiq Ali
 
 For backend documentation, see [../server/README.md](../server/README.md)

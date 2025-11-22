@@ -2,6 +2,12 @@
 
 Express.js backend server with TypeScript, MongoDB, and JWT authentication.
 
+**Squad 4**
+
+**Team Members:**
+- Vaishnav V
+- Aashiq Ali
+
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -416,5 +422,11 @@ See [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) for complete API documentatio
 ISC
 
 ---
+
+**Squad 4**
+
+**Team Members:**
+- Vaishnav V
+- Aashiq Ali
 
 For frontend documentation, see [../client/README.md](../client/README.md)

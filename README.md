@@ -2,9 +2,17 @@
 
 A full-stack healthcare management application with role-based access control, health metrics tracking, and comprehensive activity logging.
 
+**Squad 4**
+
+**Team Members:**
+
+- Vaishnav V
+- Aashiq Ali
+
 ## 🏥 Features
 
 ### Authentication & Authorization
+
 - ✅ JWT-based authentication with refresh tokens
 - ✅ Role-based access control (Patient, Doctor, Admin)
 - ✅ Secure password hashing with bcrypt
@@ -12,6 +20,7 @@ A full-stack healthcare management application with role-based access control, h
 - ✅ Session management
 
 ### User Management
+
 - ✅ User registration and login
 - ✅ Profile management with edit functionality
 - ✅ Role management (Admin can change user roles)
@@ -19,6 +28,7 @@ A full-stack healthcare management application with role-based access control, h
 - ✅ User search and filtering
 
 ### Health Metrics Tracking
+
 - ✅ Daily steps tracking
 - ✅ Water intake monitoring
 - ✅ Sleep hours logging
@@ -27,6 +37,7 @@ A full-stack healthcare management application with role-based access control, h
 - ✅ Statistics and averages
 
 ### Activity Logging
+
 - ✅ Comprehensive activity tracking
 - ✅ Login/logout logging
 - ✅ Profile update tracking
@@ -34,11 +45,13 @@ A full-stack healthcare management application with role-based access control, h
 - ✅ Activity history for patients and doctors
 
 ### Dashboards
+
 - ✅ **Patient Dashboard**: Health metrics, appointments, medical records
 - ✅ **Doctor Dashboard**: Patient list, health data, activity monitoring
 - ✅ **Admin Dashboard**: System overview, user management, statistics
 
 ### UI/UX
+
 - ✅ Modern, responsive design with Tailwind CSS
 - ✅ Professional charts using Recharts
 - ✅ Interactive modals and forms
@@ -48,6 +61,7 @@ A full-stack healthcare management application with role-based access control, h
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **React 19** - UI library
 - **React Router DOM** - Routing
 - **Tailwind CSS** - Styling
@@ -56,6 +70,7 @@ A full-stack healthcare management application with role-based access control, h
 - **React Hot Toast** - Notifications
 
 ### Backend
+
 - **Node.js** - Runtime environment
 - **Express.js** - Web framework
 - **TypeScript** - Type safety
@@ -92,6 +107,7 @@ HealthCareApp/
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Node.js (v16 or higher)
 - Yarn or npm
 - MongoDB (local or Atlas)
@@ -99,12 +115,14 @@ HealthCareApp/
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd HealthCareApp
    ```
 
 2. **Install all dependencies**
+
    ```bash
    yarn install:all
    # or
@@ -114,6 +132,7 @@ HealthCareApp/
 3. **Set up environment variables**
 
    Create `.env` file in `server/` directory:
+
    ```env
    PORT=5000
    NODE_ENV=development
@@ -127,6 +146,7 @@ HealthCareApp/
    ```
 
 4. **Seed the database** (optional)
+
    ```bash
    cd server
    yarn seed              # Seed users
@@ -137,15 +157,17 @@ HealthCareApp/
 5. **Run the application**
 
    Development (both client and server):
+
    ```bash
    yarn dev
    ```
 
    Or run separately:
+
    ```bash
    # Terminal 1 - Server
    yarn server
-   
+
    # Terminal 2 - Client
    yarn client
    ```
@@ -165,6 +187,7 @@ After seeding, you can login with:
 ## 📚 Available Scripts
 
 ### Root Level
+
 - `yarn dev` - Run both client and server in development mode
 - `yarn server` - Run only the server
 - `yarn client` - Run only the client
@@ -173,6 +196,7 @@ After seeding, you can login with:
 - `yarn build:client` - Build client for production
 
 ### Server Scripts
+
 - `yarn dev` - Run server in development mode
 - `yarn build` - Build TypeScript to JavaScript
 - `yarn start` - Run production server
@@ -183,6 +207,7 @@ After seeding, you can login with:
 - `yarn seed:health` - Seed health data
 
 ### Client Scripts
+
 - `yarn start` or `yarn dev` - Start development server
 - `yarn build` - Build for production
 - `yarn test` - Run tests
@@ -199,12 +224,14 @@ After seeding, you can login with:
 ## 🎭 User Roles
 
 ### Patient
+
 - View personal health metrics
 - Track daily steps, water intake, and sleep
 - View appointments and medical records
 - Edit own profile
 
 ### Doctor
+
 - View allocated patients
 - Access patient health data
 - View patient activity logs
@@ -212,6 +239,7 @@ After seeding, you can login with:
 - View patient details
 
 ### Admin
+
 - Manage all users
 - Change user roles and status
 - View system-wide statistics
@@ -223,6 +251,7 @@ After seeding, you can login with:
 See [server/API_DOCUMENTATION.md](./server/API_DOCUMENTATION.md) for complete API documentation.
 
 ### Main Endpoints
+
 - `/api/auth/*` - Authentication routes
 - `/api/dashboard/*` - Dashboard data
 - `/api/user/*` - User management
@@ -257,12 +286,14 @@ See [server/API_DOCUMENTATION.md](./server/API_DOCUMENTATION.md) for complete AP
 ## 📝 Development
 
 ### Code Style
+
 - TypeScript for backend
 - ESLint for linting
 - Prettier for formatting
 - Consistent naming conventions
 
 ### Best Practices
+
 - Component-based architecture
 - Reusable utility functions
 - Error handling
@@ -274,12 +305,14 @@ See [server/API_DOCUMENTATION.md](./server/API_DOCUMENTATION.md) for complete AP
 ### Production Build
 
 1. **Build the client**
+
    ```bash
    cd client
    yarn build
    ```
 
 2. **Build the server**
+
    ```bash
    cd server
    yarn build
@@ -309,5 +342,12 @@ ISC
 For issues and questions, please open an issue in the repository.
 
 ---
+
+**Squad 4**
+
+**Team Members:**
+
+- Vaishnav V
+- Aashiq Ali
 
 Built with ❤️ for healthcare management
