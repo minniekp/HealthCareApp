@@ -9,7 +9,7 @@ export interface IUser extends Document {
   DOB: Date;
   gender: "male" | "female" | "other";
   refreshToken?: string;
-  role: "admin" | "customer";
+  role: "patient" | "doctor";
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -60,8 +60,8 @@ const userSchema = new Schema<IUser>(
     },
     role: {
       type: String,
-      enum: ["admin", "customer"],
-      default: "customer",
+      enum: ["patient", "doctor"],
+      default: "patient",
     },
   },
   {
