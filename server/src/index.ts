@@ -4,6 +4,9 @@ import dotenv from 'dotenv';
 import path from 'path';
 import connectDB from './config/database';
 import authRoutes from './routes/authRoutes';
+import dashboardRoutes from './routes/dashboardRoutes';
+import userRoutes from './routes/userRoutes';
+import healthRoutes from './routes/healthRoutes';
 
 // Load environment variables from server directory
 dotenv.config({ path: path.join(__dirname, '../.env') });
@@ -56,6 +59,9 @@ app.get('/health', (req, res) => {
 // API Routes
 const API_PREFIX = process.env.API_PREFIX || '/api';
 app.use(`${API_PREFIX}/auth`, authRoutes);
+app.use(`${API_PREFIX}/dashboard`, dashboardRoutes);
+app.use(`${API_PREFIX}/user`, userRoutes);
+app.use(`${API_PREFIX}/health`, healthRoutes);
 
 // 404 handler
 app.use((req, res) => {

@@ -5,6 +5,7 @@ import {
   generateRefreshToken,
   verifyRefreshToken,
 } from '../utils/jwt';
+import { logActivity } from '../utils/activityLogger';
 
 interface RegisterBody {
   firstname: string;
@@ -176,6 +177,20 @@ export const login = async (
     user.refreshToken = refreshToken;
     await user.save({ validateBeforeSave: false });
 
+    // Log login activity
+    await logActivity(
+      {
+        userId: user._id.toString(),
+        userRole: user.role,
+        activityType: 'login',
+        description: `User logged in successfully`,
+        metadata: {
+          email: user.email,
+        },
+      },
+      req
+    );
+
     // Remove password from response
     const userResponse = {
       id: user._id,
@@ -273,9 +288,28 @@ export const refreshToken = async (
 export const logout = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = (req as any).user?.userId;
+    const userRole = (req as any).user?.role;
 
     if (userId) {
+      // Get user before updating to log activity
+      const user = await User.findById(userId);
       await User.findByIdAndUpdate(userId, { $unset: { refreshToken: 1 } });
+
+      // Log logout activity
+      if (user) {
+        await logActivity(
+          {
+            userId: user._id.toString(),
+            userRole: user.role,
+            activityType: 'logout',
+            description: `User logged out`,
+            metadata: {
+              email: user.email,
+            },
+          },
+          req
+        );
+      }
     }
 
     res.status(200).json({

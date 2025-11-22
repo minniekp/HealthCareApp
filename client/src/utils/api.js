@@ -240,6 +240,137 @@ const api = {
       return !!localStorage.getItem('accessToken');
     },
   },
+
+  // Dashboard endpoints
+  dashboard: {
+    // Get patient dashboard data
+    getPatientDashboard: async () => {
+      const response = await fetchWithAuth(`${API_BASE_URL}/dashboard/patient`, {
+        method: 'GET',
+      });
+      return handleResponse(response);
+    },
+
+    // Get doctor dashboard data
+    getDoctorDashboard: async () => {
+      const response = await fetchWithAuth(`${API_BASE_URL}/dashboard/doctor`, {
+        method: 'GET',
+      });
+      return handleResponse(response);
+    },
+
+    // Get admin dashboard data
+    getAdminDashboard: async () => {
+      const response = await fetchWithAuth(`${API_BASE_URL}/dashboard/admin`, {
+        method: 'GET',
+      });
+      return handleResponse(response);
+    },
+
+    // Get my activities
+    getMyActivities: async (limit = 50, page = 1) => {
+      const response = await fetchWithAuth(
+        `${API_BASE_URL}/dashboard/activities/me?limit=${limit}&page=${page}`,
+        {
+          method: 'GET',
+        }
+      );
+      return handleResponse(response);
+    },
+
+    // Get patient activities (doctor only)
+    getPatientActivities: async (patientId) => {
+      const response = await fetchWithAuth(
+        `${API_BASE_URL}/dashboard/activities/patient/${patientId}`,
+        {
+          method: 'GET',
+        }
+      );
+      return handleResponse(response);
+    },
+  },
+
+  // User endpoints
+  user: {
+    // Get current user profile
+    getProfile: async () => {
+      const response = await fetchWithAuth(`${API_BASE_URL}/user/profile`, {
+        method: 'GET',
+      });
+      return handleResponse(response);
+    },
+
+    // Update user profile
+    updateProfile: async (profileData) => {
+      const response = await fetchWithAuth(`${API_BASE_URL}/user/profile`, {
+        method: 'PUT',
+        body: JSON.stringify(profileData),
+      });
+      
+      const data = await handleResponse(response);
+      
+      // Update user in localStorage if profile update is successful
+      if (data.data && data.data.user) {
+        localStorage.setItem('user', JSON.stringify(data.data.user));
+      }
+      
+      return data;
+    },
+
+    // Get user by ID (for doctors to view patient details)
+    getUserById: async (userId) => {
+      const response = await fetchWithAuth(`${API_BASE_URL}/user/${userId}`, {
+        method: 'GET',
+      });
+      return handleResponse(response);
+    },
+
+    // Update user role (for doctors/admins)
+    updateUserRole: async (userId, role) => {
+      const response = await fetchWithAuth(`${API_BASE_URL}/user/${userId}/role`, {
+        method: 'PATCH',
+        body: JSON.stringify({ role }),
+      });
+      return handleResponse(response);
+    },
+
+    // Update user status (for admins)
+    updateUserStatus: async (userId, status) => {
+      const response = await fetchWithAuth(`${API_BASE_URL}/user/${userId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      });
+      return handleResponse(response);
+    },
+  },
+
+  // Health data endpoints
+  health: {
+    // Get health data (for current user or specific patient if doctor/admin)
+    getHealthData: async (patientId = null, days = 30) => {
+      const url = patientId
+        ? `${API_BASE_URL}/health/patient/${patientId}?days=${days}`
+        : `${API_BASE_URL}/health?days=${days}`;
+      const response = await fetchWithAuth(url, {
+        method: 'GET',
+      });
+      return handleResponse(response);
+    },
+
+    // Create or update health data
+    upsertHealthData: async (date, steps, waterIntake, sleepHours) => {
+      const response = await fetchWithAuth(`${API_BASE_URL}/health`, {
+        method: 'POST',
+        body: JSON.stringify({
+          date,
+          steps,
+          waterIntake,
+          sleepHours,
+        }),
+      });
+      return handleResponse(response);
+    },
+  },
 };
 
 // Export fetchWithAuth for use in other API calls
